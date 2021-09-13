@@ -1,0 +1,239 @@
+<script>
+    $(document).ready(function () {
+        var listStudent = [];
+        var idModule = $("#addSV").attr("ma-lop-hp");
+        function formatDate(string) {
+            const date = new Date(string)
+
+            const day = `0${date.getDate()}`.slice(-2);
+            const month = `0${date.getMonth() + 1}`.slice(-2);
+            const year = date.getFullYear();
+
+            return `${day}/${month}/${year}`
+        }
+        $("#myInput").on("keyup", function () {
+            var search = $(this).val().toLowerCase();
+            $("#myTable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(search) > -1)
+            });
+        })
+        $("#search").on("keyup", function () {
+            var search = $(this).val().toLowerCase();
+            $("#tableSV tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(search) > -1)
+            });
+        })
+        $("button[name='delete']").click(function () {
+            var id = $(this).val();
+            $.post(url + "admin/modules/student/delete", {
+                _id: id,
+                module: idModule
+            }, function (data) {
+                if (data == true) {
+                    $("#myTable #" + id).fadeTo(500, 0, function () {
+                        $(this).remove();
+                    });
+                    $("body").append(`<div id="snackbar">Xóa Thành Công</div>`)
+                } else {
+                    $("body").append(`<div id="snackbar">Xóa Thất Bại</div>`)
+                }
+                myFunction()
+            });
+        });
+
+        $("#addSV").click(function () {
+            var subject = $(this).attr("ma-mon-hoc");
+            $.get(url + "admin/modules/student/" + subject, function (data) {
+                var s = "";
+                data.forEach(function (student, index) {
+                    if (listStudent.length > 0) {
+                        if (listStudent.indexOf(student._id) != -1) {
+                            s += "<tr id='" + student._id + "'>" +
+                                "<td scope='row' class='align-middle'>" + (index + 1) + "</td>" +
+                                "<td>" + student.idStudent + "</td>" +
+                                "<td>" + student.name + "</td>" +
+                                "<td>" + formatDate(student.birth) + "</td>" +
+                                "<td>" + student.classActivity + "</td>" +
+                                "<td width='6em' ><button type='button' class='btn btn-danger rounded rounded-circle p-0' "
+                                +" name='addSV' value='" + student._id +"'><i class='fas fa-times'></i></button></td></tr>";
+                        } else {
+                            s += "<tr id='" + student._id + "'>" +
+                                "<td scope='row' class='align-middle'>" + (index + 1) + "</td>" +
+                                "<td>" + student.idStudent + "</td>" +
+                                "<td>" + student.name + "</td>" +
+                                "<td>" + formatDate(student.birth) + "</td>" +
+                                "<td>" + student.classActivity + "</td>" +
+                                "<td width='6em'><button type='button' class='btn btn-primary rounded rounded-circle p-0' " + 
+                                " name='addSV' value='" +student._id +"'><i class='fas fa-plus'></i></button></td></tr>";
+                        }
+                    } else {
+                        s += "<tr id='" + student._id + "'>" +
+                            "<td scope='row' class='align-middle'>" + (index + 1) + "</td>" +
+                            "<td>" + student.idStudent + "</td>" +
+                            "<td>" + student.name + "</td>" +
+                            "<td>" + formatDate(student.birth) + "</td>" +
+                            "<td>" + student.classActivity + "</td>" +
+                            "<td width='6em'><button type='button' class='btn btn-primary rounded rounded-circle p-0'"
+                            +" name='addSV' value='" + student._id +"'><i class='fas fa-plus'></i></button></td></tr>";
+                    }
+                })
+                $("#tableSV tbody").html(s);
+            });
+        });
+
+        $(document).on("click", "button[name='addSV']", function () {
+            var msv = $(this).val();
+            var text = $(this).html().toString();
+            switch (text) {
+                case '<i class="fas fa-times"></i>':
+                    $(this).html("<i class='fas fa-plus'></i>");
+                    $(this).removeClass("btn-danger");
+                    $(this).addClass("btn-primary");
+                    var n = listStudent.indexOf(msv);
+                    listStudent.splice(n, 1);
+                    break;
+                case '<i class="fas fa-plus"></i>':
+                    $(this).html("<i class='fas fa-times'></i>");
+                    $(this).removeClass("btn-primary");
+                    $(this).addClass("btn-danger");
+                    listStudent.push(msv);
+                    break;
+            }
+            $(".sl").html(listStudent.length);
+        });
+
+        $("button[name='saveSV']").click(function () {
+            $.post(url + "admin/modules/addStudent", {
+                students: JSON.stringify(listStudent),
+                _id: idModule
+            }, function (data) {
+                if (data == true) {
+                    location.href = window.location.href;
+                }
+            })
+        });
+    });
+</script>
+
+<div class="container-fluid">
+    <h3 class="text-center text-uppercase">DANH SÁCH SINH VIÊN LỚP HỌC PHẦN <%= module.nameModule %></h3>
+    <div class="row justify-content-between align-items-center">
+        <div class="input-group col-5">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" class="form-control" id="myInput">
+        </div>
+        <div class="mb-lg-2 text-right">
+            <a href="#" id="addSV" ma-lop-hp="<%= module._id %>" ma-mon-hoc="<%= module.subject %>"
+                class="rounded rounded-circle btn btn-success text-light pl-lg-2 pr-lg-2 pt-1 pb-1" data-toggle="modal"
+                data-target="#add"><i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive card mt-5">
+		<table class="table mb-0 table-hover table-striped" id="myTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Mã Sinh Viên</th>
+                    <th>Họ & Tên</th>
+                    <th>Ngày Sinh</th>
+                    <th>Lớp</th>
+                    <th class="text-center">Chức Năng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                function formatDate(string){ 
+                    const date=new Date(string) 
+                    const day=`0${ date.getDate() }`.slice(-2);
+                    const month=`0${ date.getMonth()+1 }`.slice(-2); 
+                    const year=date.getFullYear(); 
+                    return `${day}/${month}/${year}` 
+                } 
+                %>
+                <% students.forEach(function(student,index) { %>
+                <tr id="<%- student.id %>">
+                    <th scope="row" class='align-middle'><%- index+1 %></th>
+                    <td><%= student.idStudent %></td>
+                    <td><%- student.name %></td>
+                    <td><%= formatDate(student.birth) %></td>
+                    <td><%- student.classActivity %></td>
+                    <td align="center">
+                        <a class="btn btn-danger text-light rounded rounded-circle " data-toggle="modal"
+                            data-target="#Modal<%- student.id %>"><i class='fas fa-times'></i></a>
+                    </td>
+                </tr>
+                <div class="modal fade" id="Modal<%- student.id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Xóa Sinh Viên</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Xóa Sinh Viên <%- student.name %>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                <button type="button" name="delete" data-dismiss="modal" value="<%= student._id %>"
+                                    class="btn btn-primary">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>    
+</div>
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm Sinh Viên</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="container modal-body">
+                <div class="row">
+                    <div class="col-6 row">
+                        <label for="search" class="col-sm-4 col-form-label">Tìm Kiếm</label>
+                        <div class="col-8">
+                            <input type="text" class="form-control" id="search">
+                        </div>
+                    </div>
+                    <div class="col-6 text-right ">
+                        <div class="form-group mt-3">
+                            <h4 class="d-inline">Số Lương Sinh Viên Đã Thêm:</h4>
+                            <h4 class="sl d-inline text-success ml-2">0</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive card mt-5">
+                    <table class="table mb-0 table-hover table-striped" id="tableSV">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>MSV</th>
+                                <th>Họ & Tên</th>
+                                <th>Ngày Sinh</th>
+                                <th>Lớp</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success pl-4 pr-4" data-dismiss="modal" name="saveSV">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>

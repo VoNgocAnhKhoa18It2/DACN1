@@ -1,0 +1,102 @@
+<div class="container-fluid">
+    <h3 class="text-center">LỊCH DẠY</h3>
+    <% 
+    var mangThu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    var mangTiet = [1, 2, 3, 4, 5];
+
+    function formatDate(date){
+
+        const day = `0${ date.getUTCDate() }`.slice(-2);
+        const month = `0${ date.getMonth()+1 }`.slice(-2);
+        const year =  date.getFullYear();
+
+        return `${day}/${month}/${year}`
+    }
+
+    function getThu(i) {
+        const now = new Date('2021-09-27');
+        const date = (mangThu[i] != "CN") ? "Thứ "+ mangThu[i].slice(-1) : "Chủ Nhật";
+        now.setDate(now.getUTCDate() - (now.getDay()) + i +1);
+        return date + "<br>" + (formatDate(now));
+    }
+
+    
+
+    function getRowPan(times, tiet) {
+        let rowPan = 0;
+        for (let time of times) {
+            let start = time.lesson.substring(0,1);
+            const end = time.lesson.substring(3,4);
+            if (tiet == start) rowPan = time.lesson.substring(3,4) - time.lesson.substring(0,1) + 1;
+        }
+        return rowPan;
+    }
+
+    function getMonHocTheoTiet(times, tiet) {
+        for (let time of times) {
+            let start = time.lesson.substring(0,1);
+            const end = time.lesson.substring(3,4);
+            if (tiet == start) return time;
+        }
+        return null;
+    }
+
+    // 0 thêm td với dữ liệu rỗng
+    // 1 thêm td môn học, td lớp với rowpan
+    // 2 bỏ qua, vì đã có rowpan
+    function getTrangThaiCot(times, tiet) {
+        let result = 0;
+        for (let time of times) {
+            let start = time.lesson.substring(0,1);
+            const end = time.lesson.substring(3,4);
+            if (tiet == start) result = 1;
+            else if (tiet > start && tiet <= end) result = 2;
+        }
+        return result;
+    }
+    %>
+    <table class="table table-bordered table-condensed mt-5" id="myTable">
+        <thead>
+            <tr align="center" >
+                <th rowspan="4" style="vertical-align: middle;">Thứ</th>
+                <th rowspan="4" style="vertical-align: middle;">Tiết</th>
+                
+            </tr>
+            <tr align="center" >
+                <th rowspan="4">Sáng</th>
+                <th rowspan="4">Chiều</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% mangThu.forEach(function(thu, i) { %>
+                <% mangTiet.forEach(function(tiet) { %>
+                    <tr align="center">
+                        <% if (tiet == 1) {%>
+                            <th rowspan="5" style="vertical-align: middle;"><%- getThu(i) %></th>
+                        <%}%>
+                        <td><%= tiet%></td>
+                        <% if (getTrangThaiCot(calendars[i][0], tiet) == 0) {%>
+                            <td></td>
+                        <%}%>
+                        <% if(getTrangThaiCot(calendars[i][0], tiet) == 1) {%>
+                            <td class="text-capitalize" rowspan="<%=getRowPan(calendars[i][0], tiet)%>">
+                                <%- getMonHocTheoTiet(calendars[i][0], tiet).module.nameModule%><br>
+                                <%- getMonHocTheoTiet(calendars[i][0], tiet).classroom%>
+                            </td>
+                        <%}%>
+
+                        <% if (getTrangThaiCot(calendars[i][1], tiet) == 0) {%>
+                            <td></td>
+                        <%}%>
+                        <% if (getTrangThaiCot(calendars[i][1], tiet) == 1) {%>
+                            <td class="text-capitalize" rowspan="<%=getRowPan(calendars[i][1], tiet)%>">
+                                <%- getMonHocTheoTiet(calendars[i][1], tiet).module.nameModule%><br>
+                                <%- getMonHocTheoTiet(calendars[i][1], tiet).classroom%>
+                            </td>
+                        <%}%>
+                    </tr>
+                <% }) %>
+            <% }) %>
+        </tbody>
+    </table>
+</div>

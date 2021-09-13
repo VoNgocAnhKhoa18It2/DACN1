@@ -1,0 +1,37 @@
+<div class="container-fluid">
+    <h3 class="text-center">LỚP HỌC PHẦN</h3>
+    <div class="row">
+        
+    </div>
+    <div class="table-responsive card">
+        <table class="table mb-0 table-hover table-striped" id="myTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Mã Lớp Học Phần</th>
+                    <th scope="col">Tên Lớp Học Phần</th>
+                    <th class='text-center' scope="col">Chức Năng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% calendars.forEach(function(calendar,index) { %>
+                    <tr>
+                        <th scope="row" class='align-middle'>
+                            <%- index+1 %>
+                        </th>
+                        <td>
+                            <%= calendar.module.idModule.toUpperCase() %>
+                        </td>
+                        <td class="text-capitalize">
+                            <%- calendar.module.nameModule %>
+                        </td>
+                        <td align="center">
+                            <a class="btn success font-weight-bold" href="point/<%= calendar.module.idModule %>">Nhập
+                                Điểm</a>
+                        </td>
+                    </tr>
+                    <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,331 @@
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var search = $(this).val().toLowerCase();
+            $("#myTable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(search) > -1)
+            });
+        })
+        $("button[name='delete']").click(function () {
+            var id = $(this).val();
+            $.get(url + "admin/calendar/delete/" + id, function (data) {
+                if (data == true) {
+                    $("#myTable #" + id).fadeTo(500, 0, function () {
+                        $(this).remove();
+                    });
+                    $("body").append(`<div id="snackbar">Xóa Thành Công</div>`)
+                } else {
+                    $("body").append(`<div id="snackbar">Xóa Thất Bại</div>`)
+                }
+                myFunction()
+            });
+        });
+
+    });
+</script>
+
+<div class="container-fluid">
+    <h3 class="text-center">DANH SÁCH LỊCH HỌC</h3>
+    <div class="row justify-content-between align-items-center">
+        <div class="input-group col-5">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" class="form-control" id="myInput">
+        </div>
+        <div class="mb-lg-2 text-right">
+            <a href="#" class="rounded rounded-circle btn btn-success text-light pl-lg-2 pr-lg-2 pt-1 pb-1"
+                data-toggle="modal" data-target="#add"><i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive card mt-5">
+		<table class="table mb-0 table-hover" id="myTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Tên Lớp Học Phần</th>
+                    <th>Thời Gian</th>
+                    <th>Tiết</th>
+                    <th>Phòng</th>
+                    <th>Giáo Viên</th>
+                    <th>Ngày Bắt Đầu</th>
+                    <th>Ngày Kết Thúc</th>
+                    <th>Mô Tả</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <%  const descriptions = [ ['1', 'Lý Thuyết',] ,['2', 'Thực Hành'], ['3', 'Bù']]
+                    const dayOfWeek = [ 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy']
+                    function getDayOfWeek(string){
+                        const hasNumber = /\d/  
+                        if(hasNumber.test(string)) {
+                            return 'Thứ '+ dayOfWeek[(string.slice(-1)- 2)] 
+                        } 
+                        return 'Chủ Nhật'
+                    }  
+                    function formatDate(string,step){
+                        const date = new Date(string)
+                        
+                        const day = `0${ date.getDate() }`.slice(-2);
+                        const month = `0${ date.getMonth() + 1 }`.slice(-2);
+                        const year = `${ date.getFullYear() }`;
+                        
+                        return `${day}${ step }${month}${ step }${year}`
+                    }  
+
+                    function selected(obj1,obj2) {
+                        if (obj1 == obj2) 
+                            return 'selected="selected"' 
+                        return ''
+                    }
+                %> 
+
+                <% calendars.forEach(function(module,indexM) { 
+                    module.calendars.forEach(function(calendar,index){    
+                %>
+                <% if (index == 0) { %> 
+                    <tr class="font-weight-bold" id="<%- calendar._id %>">
+                        <th scope="row" class='align-middle'><%- indexM+1 %></th>
+                        <td><%- module.nameModule.toUpperCase() %></td>
+                        <td><%= getDayOfWeek(calendar.dayOfWeek) %> </td>
+                        <td><%- calendar.lesson %></td>
+                        <td><%- calendar.classroom %></td>
+                        <td><%- calendar.teacher.name %></td>
+                        <td><%= formatDate(calendar.dateStart,'/') %></td>
+                        <td><%= formatDate(calendar.dateEnd,'/') %></td>
+                        <td><%- descriptions[calendar.description-1][1] %></td>
+                        <td >
+                            <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- calendar._id %>"
+                                class="btn btn-warning text-light rounded rounded-circle">
+                                <i class="fas fa-pen"></i>
+                            </a>
+
+                            <a class="btn btn-danger text-light rounded rounded-circle" data-toggle="modal"
+                                data-target="#Modal<%- calendar._id %>"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                <% } else { %> 
+                    <tr class="font-weight-bold" id="<%- calendar._id %>">
+                        <td></td>
+                        <td></td>
+                        <td><%= getDayOfWeek(calendar.dayOfWeek) %> </td>
+                        <td><%- calendar.lesson %></td>
+                        <td><%- calendar.classroom %></td>
+                        <td><%- calendar.teacher.name %></td>
+                        <td><%= formatDate(calendar.dateStart,'/') %></td>
+                        <td><%= formatDate(calendar.dateEnd,'/') %></td>
+                        <td><%- descriptions[calendar.description-1][1]  %></td>
+                        <td >
+                            <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- calendar._id %>"
+                                class="btn btn-warning text-light rounded rounded-circle">
+                                <i class="fas fa-pen"></i>
+                            </a>
+
+                            <a class="btn btn-danger text-light rounded rounded-circle" data-toggle="modal"
+                                data-target="#Modal<%- calendar._id %>"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                <% } %>
+                <div class="modal fade" id="Modal<%- calendar._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Xóa Lịch Học</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Xóa Lịch Học Của <%- calendar.nameModule %>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                <button type="button" name="delete" data-dismiss="modal" value="<%- calendar._id %>"
+                                    class="btn btn-primary">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="exampleModal<%- calendar._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Chỉnh Sửa Lịch Học</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form class="p-2 " action="/admin/calendar/edit" method="POST">
+                                <div class="modal-body <%- calendar._id %>">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Thời Gian</label>
+                                        <select class="form-control" name="dayOfWeek">
+                                            <% listDate.forEach(function(date) { %>
+                                            <option value="<%= date[0] %>"
+                                                <%= (date[0]==calendar.dayOfWeek) ? "selected" : "" %>><%= date[1] %>
+                                            </option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                    <div class="form-group row mt-4 mb-1">
+                                        <label class="font-weight-bold col-4 pt-1">Tiết Học</label>
+                                        <div class="form-group col-8 row p-0">
+                                            <div class="col-4 m-0 p-0">
+                                                <select class="form-control" name="bat_dau">
+                                                    <% for (var i = 1; i <=10; i++) { %>
+                                                    <option value="<%= i %>"
+                                                        <%= (i==Number(calendar.lesson.slice(0,1))) ? "selected" : "" %>>
+                                                        Tiết <%= i %> </option>
+                                                    <% } %>
+                                                </select>
+                                            </div>
+                                            <div class="col-4 font-weight-bold pt-1 text-center"> </div>
+                                            <div class="col-4 m-0 p-0">
+                                                <select class="form-control" name="ket_thuc">
+                                                    <% for (var i = 1; i <=10; i++) { %>
+                                                    <option value="<%= i %>"
+                                                        <%= (i==Number(calendar.lesson.slice(3))) ? "selected" : "" %>>
+                                                        Tiết <%= i %> </option>
+                                                    <% } %>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Phòng</label>
+                                        <input type="text" name="classroom" class="form-control"  value="<%- calendar.classroom%>"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Giáo Viên</label>
+                                        <select class="form-control" name="teacher" >
+                                            <% teachers.forEach(function(teacher) { %>
+                                                <option value="<%= teacher._id %>" <%= selected(teacher._id.toString(),calendar.teacher._id.toString()) %> ><%= teacher.name %> </option>
+                                            <% }) %>
+                                        </select> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Ngày Bắt Đầu</label>
+                                        <input type="date" class="form-control" name="dateStart"
+                                        value="<%= new Date(calendar.dateStart).toISOString().substring(0, 10) %>"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Ngày Kết Thúc</label>
+                                        <input type="date" class="form-control" name="dateEnd" 
+                                        value="<%= new Date(calendar.dateEnd).toISOString().substring(0, 10) %>"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Mô Tả</label>
+                                        <select class="form-control" name="description">
+                                            <% descriptions.forEach(function(description) { %>
+                                                <option value="<%= description[0] %>" <%= selected(description[0],calendar.description) %> > 
+                                                    <%= description[1] %> 
+                                                </option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" value="<%- calendar._id %>" class="btn btn-success w-25" name="_id">Lưu</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+                <% if (calendars.length != indexM+1) {%>
+                <tr class="table-active">
+                    <td colspan="10"></td>
+                </tr>
+                <% } %>
+            <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm Lịch Học</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="p-2" method="post" action="/admin/calendar/add">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Lớp Học Phần</label>
+                        <select class="form-control text-uppercase" name="module">
+                            <% modules.forEach(function(module) { %>
+                                <option value="<%= module._id %>"><%= module.nameModule %> </option>
+                            <% }) %> 
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Thời Gian</label>
+                        <select class="form-control" name="dayOfWeek">
+                            <% listDate.forEach(function(date) { %>
+                            <option value="<%= date[0] %>"><%= date[1] %> </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group row mt-4 mb-1">
+                        <label class="font-weight-bold col-4 pt-1">Tiết Học</label>
+                        <div class="form-group col-8 row p-0">
+                            <div class="col-4 m-0 p-0">
+                                <select class="form-control" name="bat_dau">
+                                    <% for (var i = 1; i <=10; i++) { %>
+                                    <option value="<%= i %>"> Tiết <%= i %> </option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="col-4 font-weight-bold pt-1 text-center"> </div>
+                            <div class="col-4 m-0 p-0">
+                                <select class="form-control" name="ket_thuc">
+                                    <% for (var i = 2; i <=10; i++) { %>
+                                    <option value="<%= i %>"> Tiết <%= i %> </option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Phòng</label>
+                        <input type="text" name="classroom" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Giáo Viên</label>
+                        <select class="form-control" name="teacher">
+                            <% teachers.forEach(function(teacher) { %>
+                                <option value="<%= teacher._id %>"><%= teacher.name %> </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Ngày Bắt Đầu</label>
+                        <input type="date" class="form-control" name="dateStart">
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Ngày Kết Thúc</label>
+                        <input type="date" class="form-control" name="dateEnd"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Mô Tả</label>
+                        <select class="form-control" name="description">
+                            <% descriptions.forEach(function(description) { %>
+                                <option value="<%= description[0] %>"><%= description[1] %> </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success w-25" >Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

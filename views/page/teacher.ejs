@@ -1,0 +1,182 @@
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var search = $(this).val().toLowerCase();
+            $("#myTable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(search) > -1)
+            });
+        })
+        $("button[name='delete']").click(function () {
+            var id = $(this).val();
+            $.get(url + "admin/teacher/delete/" + id, function (data) {
+                if (data == true) {
+                    $("#myTable #" + id).fadeTo(500, 0, function () {
+                        $(this).remove();
+                    });
+                    $("body").append(`<div id="snackbar">Xóa Thành Công</div>`)
+                } else {
+                    $("body").append(`<div id="snackbar">Xóa Thất Bại</div>`)
+                }
+                myFunction()
+            });
+        });
+    });
+</script>
+<div class="container-fluid">
+    <h3 class="text-center">DANH SÁCH GIÁO VIÊN</h3>
+    <div class="row justify-content-between align-items-center">
+        <div class="input-group col-5">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" class="form-control" id="myInput">
+        </div>
+        <div class="mb-lg-2 text-right">
+            <a href="#" class="rounded rounded-circle btn btn-success text-light pl-lg-2 pr-lg-2 pt-1 pb-1"
+                data-toggle="modal" data-target="#add"><i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive card mt-5">
+        <table class="table mb-0 table-hover table-striped" id="myTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>MGV</th>
+                    <th>Họ & Tên</th>
+                    <th>Giới Tính</th>
+                    <th>Email</th>
+                    <th>SĐT</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% teachers.forEach(function(teacher,index) { %>
+                <tr id="<%- teacher._id %>">
+                    <th scope="row" class='align-middle'><%- index+1 %></th>
+                    <td><%- teacher.idTeacher %></td>
+                    <td><%- teacher.name %></td>
+                    <td><%- teacher.gender %></td>
+                    <td><%- teacher.email %></td>
+                    <td><%- teacher.phoneNumber %></td>
+                    <td>
+                        <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- teacher._id %>"
+                            class="btn btn-warning text-light rounded rounded-circle">
+                            <i class="fas fa-pen-square"></i>
+                        </a>
+
+                        <a class="btn btn-danger text-light rounded rounded-circle" data-toggle="modal"
+                            data-target="#Modal<%- teacher._id %>"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+                <div class="modal fade" id="Modal<%- teacher._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Xóa Giáo Viên</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Xóa Giáo Viên <%- teacher.name %>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                <button type="button" name="delete" value="<%- teacher._id %>" class="btn btn-primary"
+                                    data-dismiss="modal">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="exampleModal<%- teacher._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Chỉnh Sửa Thông Tin Giáo Viên</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form class="p-2" action="/admin/teacher/update" method="POST">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Mã Giáo Viên</label>
+                                        <input type="text" class="form-control text-uppercase" name="idTeacher" value="<%- teacher.idTeacher %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Họ & Tên</label>
+                                        <input type="text" class="form-control text-capitalize" name="name" value="<%- teacher.name %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Giới Tính</label>
+                                        <input type="text" class="form-control" name="gender" value="<%- teacher.gender %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Email</label>
+                                        <input type="email" class="form-control" name="email"
+                                            value="<%- teacher.email %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Mật Khẩu</label>
+                                        <input type="password" class="form-control" name="password" value="<%- teacher.password %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Số Điện Thoại</label>
+                                        <input type="text" class="form-control" name="phoneNumber" value="<%- teacher.phoneNumber %>" />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" value="<%- teacher.id %>" class="btn btn-success w-25"
+                                        name="_id">Lưu</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm Giáo Viên</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="p-2" method="post" action="/admin/teacher/add">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Mã Giáo Viên</label>
+                        <input type="text" class="form-control text-uppercase" name="idTeacher" />
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Họ & Tên</label>
+                        <input type="text" class="form-control text-capitalize" name="name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Giới Tính</label>
+                        <input type="type" class="form-control" name="gender" />
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Email</label>
+                        <input type="email" class="form-control" name="email" />
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Số Điện Thoại</label>
+                        <input type="text" class="form-control" name="phoneNumber" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success w-25">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

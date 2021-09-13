@@ -1,0 +1,95 @@
+<script>
+    $(document).ready(function () {
+        $("input[type='number']").click(function () {
+            $(this).val("");
+        })
+    })
+</script>
+<div class="container-fluid">
+    <h3 class="text-center text-uppercase mb-4"><%= module.nameModule %> </h3>
+    <div class="table-responsive card">
+        <table class="table mb-0 table-hover table-striped" id="myTable">
+            <thead class="thead-dark">
+                <tr >
+                    <th>#</th>
+                    <th>Mã Sinh Viên</th>
+                    <th>Họ & Tên</th>
+                    <th>Lớp</th>
+                    <th>Điểm CC</th>
+                    <th>Điểm Bài Tập</th>
+                    <th>Điểm Giữa Kỳ</th>
+                    <th>Điểm Cuối Kỳ</th>
+                    <th>Điểm T10</th>
+                    <th>Điểm Chữ</th>
+                    <th>Chức Năng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% points.forEach(function(point,index) { %>
+                <tr >
+                    <th scope="row" class='align-middle' ><%- index+1 %></th>
+                    <td><%= point.student.idStudent %></td>
+                    <td><%- point.student.name %></td>
+                    <td><%- point.student.classActivity %></td>
+                    <td><%= point.cc %></td>
+                    <td><%= point.bt %></td>
+                    <td><%= point.gk %></td>
+                    <td><%= point.ck %></td>
+                    <td><%= point.t10 %></td>
+                    <td><%= point.letter %></td>
+                    <td>
+                        <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- point._id %>"
+                            class="btn btn-warning text-light">
+                            Sửa Điểm
+                        </a>
+                    </td>
+                </tr>
+                <div class="modal fade" id="exampleModal<%- point._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Chỉnh Sửa Điểm</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form class="p-2" action="/point/edit" method="POST">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Mã Sinh Viên : <%= point.student.idStudent%></label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Họ & Tên : <%= point.student.name %></label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Điểm Chuyển Cần </label>
+                                        <input type="number" step="0.1" class="form-control" name="cc" value="<%= point.cc %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Điểm Bài Tập</label>
+                                        <input type="number" step="0.1" class="form-control" name="bt" value="<%= point.bt %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Điểm Giữa Kỳ</label>
+                                        <input type="number" step="0.01" class="form-control" name="gk" value="<%= point.gk %>" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Điểm Cuối Kỳ</label>
+                                        <input type="number" step="0.01" class="form-control" name="ck" value="<%= point.ck %>" />
+                                        <input type="hidden" class="form-control" name="path" value="" />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" value="<%- point._id %>" class="btn btn-success w-25"
+                                        name="_id">Lưu</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>

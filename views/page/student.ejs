@@ -1,0 +1,303 @@
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var search = $(this).val().toLowerCase();
+            $("#myTable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(search) > -1)
+            });
+        })
+        $("button[name='delete']").click(function () {
+            const id = $(this).val();
+            $.get(url + "admin/student/delete/" + id, function (data) {
+                if (data == true) {
+                    $("#myTable #" + id).fadeTo(500, 0, function () {
+                        $(this).remove();
+                    });
+                    $("body").append(`<div id="snackbar">Xóa Thành Công</div>`)
+                } else {
+                    $("body").append(`<div id="snackbar">Xóa Thất Bại</div>`)
+                }
+                myFunction()
+            });
+        });
+        $("#upload_files").change(function (event) {
+            var input_file = document.getElementById('upload_files');
+            var src = "";
+            
+			var name = event.target.files.name;
+			var mime_type = event.target.files[0].type.split("/");
+			if(mime_type[0] == "image") {
+				src = URL.createObjectURL(event.target.files[0]);
+			}
+			$("#add-image").attr('src', src)
+		});
+
+        $(".edit_files").change(function (event) {
+            var id_image = $(this).attr('id-image')
+            var src = "";
+        
+			var name = event.target.files.name;
+			var mime_type = event.target.files[0].type.split("/");
+			if(mime_type[0] == "image") {
+				src = URL.createObjectURL(event.target.files[0]);
+			}
+			$("img."+id_image).attr('src', src)
+		});
+    });
+</script>
+<div class="container-fluid">
+    <h3 class="text-center">DANH SÁCH SINH VIÊN</h3>
+    <div class="row justify-content-between align-items-center">
+        <div class="input-group col-5">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" class="form-control" id="myInput">
+        </div>
+        <div class="mb-lg-2 text-right">
+            <a href="#" class="rounded rounded-circle btn btn-success text-light pl-lg-2 pr-lg-2 pt-1 pb-1"
+                data-toggle="modal" data-target="#add"><i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive card mt-5">
+        <table class="table mb-0 table-hover table-striped" id="myTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Avatar</th>
+                    <th>MSV</th>
+                    <th>Họ & Tên</th>
+                    <th>Giới Tính</th>
+                    <th>Ngày Sinh</th>
+                    <th>Lớp</th>
+                    <th>Email</th>
+                    <th>Chức Năng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                    function formatDate(string,step){
+                        const date = new Date(string)
+                        
+                        const day = `0${ date.getDate() }`.slice(-2);
+                        const month = `0${ date.getMonth() + 1 }`.slice(-2);
+                        const year = `${ date.getFullYear() }`;
+
+                        return `${day}${ step }${month}${ step }${year}`
+                    }   
+                    
+                    function checkImage(params) {
+                        if (params == null) {
+                        return 'person.jpg'; 
+                        } 
+                        return params;
+                    }
+                %> 
+                <% students.forEach(function(student,index) { %>
+                <tr id="<%- student._id %>">
+                    <th scope="row" class='align-middle'><%- index+1 %></th>
+                    <td><img src="/assets/img/avatar/<%= checkImage(student.avatar) %>" height="60px" alt=""></td>
+                    <td><%- student.idStudent %></td>
+                    <td><%- student.name %></td>
+                    <td><%- student.gender %></td>
+                    <td><%= formatDate(student.birth,'/') %></td>
+                    <td><%- student.classActivity %></td>
+                    <td><%- student.email %></td>
+                    <td width="140px">
+                        <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- student._id %>"
+                            class="btn btn-warning text-light rounded rounded-circle">
+                            <i class="fas fa-pen"></i>
+                        </a>
+
+                        <a class="btn btn-danger text-light rounded rounded-circle" data-toggle="modal"
+                            data-target="#Modal<%- student._id %>"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+                <div class="modal fade" id="Modal<%- student._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Xóa Sinh Viên</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Xóa Sinh Viên <%- student.name %>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                <button type="button" name="delete" value="<%- student._id %>" class="btn btn-primary"
+                                    data-dismiss="modal">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="exampleModal<%- student._id %>" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Chỉnh Sửa Thông Tin Sinh Viên</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form class="p-2" action="/admin/student/update" method="POST" encType="multipart/form-data">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div id='image-upload' 
+                                            class='ic-sing-file d-flex justify-content-center align-items-center'>
+                                                <label for="<%- student._id %>" id = 'upload' class="btn upload"><i class="fas fa-camera fa-x2 f030"></i>
+                                                    <input id-image="<%- student._id %>" type="file" name="image" id="<%- student._id %>" class="edit_files form-control"> 
+                                                </label>
+                                                <img class='rounded-sm <%- student._id %>' style='max-width: 240px' height='250' src='assets/img/avatar/<%- checkImage(student.avatar) %>' title='image-upload'>
+                                            </div>
+                                            <input type="hidden" name="avatar" value="<%= student.avatar %>" >
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Mã Sinh Viên</label>
+                                                <input type="text" class="form-control text-uppercase" name="idStudent" value="<%- student.idStudent %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Họ & Tên</label>
+                                                <input type="text" class="form-control text-capitalize" name="name" value="<%- student.name %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Giới Tính</label>
+                                                <input type="text" class="form-control" name="gender"
+                                                    value="<%- student.gender %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Ngày Sinh</label>
+                                                <input type="date" class="form-control" name="birth" 
+                                                value="<%= new Date(student.birth).toISOString().substring(0, 10) %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Khóa Học</label>
+                                                <input type="text" class="form-control" name="course" value="<%= student.course %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">LỚP</label>
+                                                <select class="form-control" name="classActivity">
+                                                    <% classes.forEach(function(lop) { %>
+                                                    <option value="<%= lop.idClass %>" <% if (lop.idClass == student.classActivity) { %>
+                                                        selected="selected" <% } %>>
+                                                        <%= lop.nameClass %>
+                                                    </option>
+                                                    <% }); %>
+                                                    </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Email</label>
+                                                <input type="email" class="form-control" name="email"
+                                                    value="<%- student.email %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Mật Khẩu</label>
+                                                <input type="password" class="form-control" aria-describedby="passwordHelpInline" name="password" id="password"
+                                                    value="<%- student.password %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Số Điện Thoại</label>
+                                                <input type="text" class="form-control" name="phoneNumber" value="<%- student.phoneNumber %>" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Địa Chỉ</label>
+                                                <input type="text" class="form-control" name="address"
+                                                    value="<%- student.address %>" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" value="<%- student._id %>" class="btn btn-success w-25"
+                                        name="_id">Lưu</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm Sinh Viên</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="p-2" method="post" action="/admin/student/add" encType="multipart/form-data">
+                <div class="modal-body pt-0 pb-0 pl-2 pr-2">
+                    <div class="row">
+                        <div class="col-4">
+                            <div id='image-upload'
+                                class='ic-sing-file position-relative d-flex justify-content-center align-items-center'>
+                                <label for="upload_files" id='upload' class="btn upload"><i class="fas fa-camera fa-x2 f030"></i>
+                                    <input type="file" name="image" id="upload_files" class="form-control" value="Upload">
+                                </label>
+                                <img class='rounded-sm' style='max-width: 240px' height='250' id='add-image' src='assets/img/avatar/person.jpg' title='image-upload'>
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Mã Sinh Viên</label>
+                                <input type="text" class="form-control text-uppercase" name="idStudent" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Họ & Tên</label>
+                                <input type="text" class="form-control text-capitalize" name="name" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Giới Tính</label>
+                                <input type="text" class="form-control" name="gender" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Ngày Sinh</label>
+                                <input type="date" class="form-control" name="birth" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Khóa Học</label>
+                                <input type="text" class="form-control" name="course" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">LỚP</label>
+                                <select class="form-control" name="classActivity">
+                                    <% classes.forEach(function(lop) { %>
+                                        <option value="<%= lop.idClass %>">
+                                            <%= lop.nameClass %>
+                                        </option>
+                                        <% }); %>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Email</label>
+                                <input type="email" class="form-control" name="email" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Số Điện Thoại</label>
+                                <input type="text" class="form-control" name="phoneNumber" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Địa Chỉ</label>
+                                <input type="text" class="form-control" name="address" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success w-25">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

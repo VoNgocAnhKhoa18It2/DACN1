@@ -1,0 +1,147 @@
+<script>
+	$(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var search = $(this).val().toLowerCase();
+            $("#myTable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(search) > -1)
+            });
+        })
+        $("button[name='delete']").click(function () {
+            var id = $(this).val();
+            $.get(url + "admin/class/delete/" + id, function (data) {
+                if (data == true) {
+                    $("#myTable #" + id).fadeTo(500, 0, function () {
+                        $(this).remove();
+                    });
+                    $("body").append(`<div id="snackbar">Xóa Thành Công</div>`)
+                } else {
+                    $("body").append(`<div id="snackbar">Xóa Thất Bại</div>`)
+                }
+                myFunction()
+            });
+        });
+    });
+</script>
+<div class="container-fluid">
+	<h3 class="text-center">DANH SÁCH LỚP</h3>
+	<div class="row justify-content-between align-items-center">
+        <div class="input-group col-5">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" class="form-control" id="myInput">
+        </div>
+        <div class="mb-lg-2 text-right">
+            <a href="#" class="rounded rounded-circle btn btn-success text-light pl-lg-2 pr-lg-2 pt-1 pb-1"
+                data-toggle="modal" data-target="#add"><i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+	<div class="table-responsive card mt-5">
+		<table class="table mb-0 table-hover table-striped" id="myTable">
+            <thead class="thead-dark">
+                <tr >
+                    <th>#</th>
+					<th>Mã Lớp</th>
+					<th>Tên Lớp</th>
+					<th>Chức Năng</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% classes.forEach(function(lop,index) { %>
+				<tr id="<%- lop._id %>">
+					<th scope="row" class='align-middle'><%- index+1 %></th>
+					<td><%- lop.idClass %></td>
+					<td><a href="admin/class/<%- lop.nameClass %>"><%- lop.nameClass %></a></td>
+					<td width="15%">
+						<a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- lop._id %>"
+							class="btn btn-warning text-light rounded rounded-circle">
+							<i class="fas fa-pen-square"></i>
+						</a>
+
+						<a class="btn btn-danger text-light rounded rounded-circle" data-toggle="modal" data-target="#Modal<%- lop._id %>">
+							<i class="fas fa-trash-alt"></i>
+						</a>
+					</td>
+				</tr>
+				<div class="modal fade" id="Modal<%- lop._id %>" tabindex="-1" role="dialog"
+					aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">Xóa Lớp</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								Xóa Lớp <%- lop.nameClass %>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Trở về</button>
+								<button type="button" name="delete" value="<%- lop._id %>" class="btn btn-primary">Xóa</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="exampleModal<%- lop.id %>" tabindex="-1" role="dialog"
+					aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">Chỉnh Sửa Lớp</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form class="p-2" action="/admin/class/edit" method="POST">
+								<div class="modal-body">
+									<div class="form-group">
+										<label class="font-weight-bold">MÃ LỚP</label>
+										<input type="text" class="form-control text-uppercase" name="idClass" value="<%- lop.idClass %>" />
+									</div>
+									<div class="form-group">
+										<label class="font-weight-bold text-uppercase">TÊN LỚP</label>
+										<input type="text" class="form-control" name="nameClass" value="<%- lop.nameClass %>" />
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="submit" value="<%- lop._id %>" class="btn btn-success w-25"
+										name="edit">Lưu</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<% }); %>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Thêm Lớp</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<form class="p-2" method="post" action="/admin/class/add">
+				<div class="modal-body">
+					<div class="form-group">
+						<label class="font-weight-bold">Mã Lớp</label>
+						<input type="text" class="form-control text-uppercase" name="idClass" value="" />
+					</div>
+					<div class="form-group">
+						<label class="font-weight-bold">Tên Lớp</label>
+						<input type="text" class="form-control text-uppercase" name="nameClass" value="" />
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-success w-25" name="add">Thêm</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
