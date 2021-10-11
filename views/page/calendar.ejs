@@ -10,14 +10,12 @@
             var id = $(this).val();
             $.get(url + "admin/calendar/delete/" + id, function (data) {
                 if (data == true) {
-                    $("#myTable #" + id).fadeTo(500, 0, function () {
-                        $(this).remove();
-                    });
-                    $("body").append(`<div id="snackbar">Xóa Thành Công</div>`)
-                } else {
+                    location.href = window.location.href;
+                }else {
                     $("body").append(`<div id="snackbar">Xóa Thất Bại</div>`)
+                    myFunction()
                 }
-                myFunction()
+                
             });
         });
 
@@ -85,31 +83,14 @@
                 <% calendars.forEach(function(module,indexM) { 
                     module.calendars.forEach(function(calendar,index){    
                 %>
-                <% if (index == 0) { %> 
-                    <tr class="font-weight-bold" id="<%- calendar._id %>">
+                <tr class="font-weight-bold" id="<%- calendar._id %>">
+                    <% if (index == 0) { %> 
                         <th scope="row" class='align-middle'><%- indexM+1 %></th>
                         <td><%- module.nameModule.toUpperCase() %></td>
-                        <td><%= getDayOfWeek(calendar.dayOfWeek) %> </td>
-                        <td><%- calendar.lesson %></td>
-                        <td><%- calendar.classroom %></td>
-                        <td><%- calendar.teacher.name %></td>
-                        <td><%= formatDate(calendar.dateStart,'/') %></td>
-                        <td><%= formatDate(calendar.dateEnd,'/') %></td>
-                        <td><%- descriptions[calendar.description-1][1] %></td>
-                        <td >
-                            <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal<%- calendar._id %>"
-                                class="btn btn-warning text-light rounded rounded-circle">
-                                <i class="fas fa-pen"></i>
-                            </a>
-
-                            <a class="btn btn-danger text-light rounded rounded-circle" data-toggle="modal"
-                                data-target="#Modal<%- calendar._id %>"><i class="fas fa-trash-alt"></i></a>
-                        </td>
-                    </tr>
-                <% } else { %> 
-                    <tr class="font-weight-bold" id="<%- calendar._id %>">
+                    <% } else { %> 
                         <td></td>
                         <td></td>
+                    <% } %>
                         <td><%= getDayOfWeek(calendar.dayOfWeek) %> </td>
                         <td><%- calendar.lesson %></td>
                         <td><%- calendar.classroom %></td>
@@ -127,7 +108,7 @@
                                 data-target="#Modal<%- calendar._id %>"><i class="fas fa-trash-alt"></i></a>
                         </td>
                     </tr>
-                <% } %>
+                
                 <div class="modal fade" id="Modal<%- calendar._id %>" tabindex="-1" role="dialog"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">

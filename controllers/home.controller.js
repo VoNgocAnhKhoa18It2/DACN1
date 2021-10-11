@@ -6,38 +6,34 @@ const Point = require('../models/point.model')
 const Subject = require('../models/subject.model')
 const Calendar = require('../models/calendar.model')
 
-const dates = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-
-var dateNames = [
-    'Chủ Nhật',
-    'Thứ Hai',
-    'Thứ Ba',
-    'Thứ Tư',   
-    'Thứ Năm',
-    'Thứ Sáu',
-    'Thứ Bảy',
-];
-
 module.exports = {
 
     index: async (req, res) => {
-        const thu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-        const calendars = await Calendar.find({ teacher: res.locals.user._id }).populate('module');
-        let list = [[[],[]],[[],[]],[[],[]],[[],[]],[[],[]],[[],[]],[[],[]]];
-        calendars.forEach((calendar, index) => {
-            var i = thu.indexOf(calendar.dayOfWeek);
-            if (calendar.lesson.substring(0,1) <= 5 ) {
-                list[i][0].push(calendar);
-            } else {
-                calendar.lesson = `${calendar.lesson.substring(0,1)-5}->${calendar.lesson.substring(3,calendar.lesson.length)-5}`;
-                list[i][1].push(calendar);
-            }
-        })
+        if (res.locals.user == "admin") {
+            res.redirect('/admin')
+            return
+        }
+        const calendars = await Module.find( {$nor: [{calendars: {$exists: false}}, {calendars: {$size: 0}}]} ).sort({ nameModule: 1 })
+            .populate({ 
+                path: 'calendars',
+                match: {
+                    $nor: [
+                        { dateStart: { $gt: new Date()}}, 
+                        { dateEnd: { $lt: new Date(),}}
+                    ]
+                },
+                select: 'dayOfWeek classroom lesson description teacher dateStart dateEnd',
+                populate: { 
+                    path: 'teacher',
+                    select: 'name _id'
+                },
+                options: { sort:{ description: 1 }}
+            })
         res.render("pageTeacher/index", {
             title: "Home",
             status: res.locals.status,
             user: res.locals.user.name,
-            calendars: list,
+            calendars: calendars,
         });
     },
     edit_password : async (req, res) => {
@@ -65,7 +61,18 @@ module.exports = {
 
     calendar: async (req, res) => {
         const thu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-        const calendars = await Calendar.find({ teacher: res.locals.user._id }).populate('module');
+        const find = {
+            $and: [
+                { 
+                    teacher: res.locals.user._id,
+                },
+                {$nor: [
+                    { dateStart: { $gt: new Date()}}, 
+                    { dateEnd: { $lt: new Date(),}}
+                ]},
+            ]
+        }
+        const calendars = await Calendar.find(find).populate('module');
         let list = [[[],[]],[[],[]],[[],[]],[[],[]],[[],[]],[[],[]],[[],[]]];
         calendars.forEach((calendar, index) => {
             var i = thu.indexOf(calendar.dayOfWeek);

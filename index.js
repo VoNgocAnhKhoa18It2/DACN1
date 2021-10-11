@@ -24,7 +24,6 @@ app.use(cookieParser("mySecretKey"))
 app.use(session({
 	secret: 'mySecretKey',
 }));
-app.use(fileUpload())
 
 const port = process.env.PORT || 3000;
 app.set("view engine", "ejs");
@@ -32,15 +31,17 @@ app.use(middleware.checkSession)
 
 app.use(morgan("dev"))
 app.use("/assets", express.static(__dirname + "/public"));
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({
-    extended: false
-}))
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload())
+ 
 app.use(expressLayouts);
+
 app.use("/api/v4", ApiRouter);
 app.use("/login",LoginRouter);
 app.use("/",middleware.checkUser ,HomeRouter);
-app.use("/admin", middleware.checkAdmin ,AdminRouter);
+app.use("/admin", middleware.checkAdmin,AdminRouter);
 
 
 http.listen(port, () => console.log(`App listening at http://localhost:${port}`));

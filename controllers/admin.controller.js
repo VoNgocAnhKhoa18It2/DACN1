@@ -136,11 +136,11 @@ module.exports = {
     addStudent: async (req, res) => {
         const add =  req.body;
         if (req.files != null) {
-            let img = req.files.avatar
-            const err = await img.mv("./public/img/avatar/" + img.name)
+            let img = req.files.image
+            const err = await img.mv("./public/img/avatar/" + req.body._id+img.name.slice(-4))
             if (err) return err
-            add.avatar = img.name
-        } 
+            add.avatar = req.body._id+img.name.slice(-4)
+        }
         add.password = "123456"
 
         await new Student(add).save()
@@ -156,9 +156,9 @@ module.exports = {
         const update = req.body
         if (req.files != null) {
             let img = req.files.image
-            const err = await img.mv("./public/img/avatar/" + img.name)
+            const err = await img.mv("./public/img/avatar/" + req.body._id+img.name.slice(-4))
             if (err) return err
-            update.avatar = img.name
+            update.avatar = req.body._id+img.name.slice(-4)
         }
 
         const checkUser = await Student.find({email: req.body.email});
@@ -446,6 +446,7 @@ module.exports = {
         })
         const doc = await Calendar.deleteOne({ _id: _id });
         if (doc.ok == 1) {
+            req.session.status = "Xóa Thành Công"
             res.send(true);
         } else {
             res.send(false);
