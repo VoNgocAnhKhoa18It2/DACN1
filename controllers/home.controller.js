@@ -92,7 +92,7 @@ module.exports = {
     },
 
     point: async (req, res) => {
-        const calendars = await Calendar.find({ teacher: res.locals.user._id, description: 'LT' }).populate('module');
+        const calendars = await Calendar.find({ teacher: res.locals.user._id, description: '1' }).populate('module');
         res.render('pageTeacher/point',{
             title: "Nhập Điểm",
             status: res.locals.status,
