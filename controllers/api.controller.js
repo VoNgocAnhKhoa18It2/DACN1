@@ -69,7 +69,7 @@ module.exports = {
 
     calendarToday: async (req, res) => {
         var now = new Date();
-        const thu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN','thu[now.getDay() - 1]'];
+        const thu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
         const data = {
             successful: false,
         }   
@@ -80,7 +80,7 @@ module.exports = {
                 $and: [
                     { 
                         module: { $in: module.modules },
-                        dayOfWeek: 'T2'
+                        dayOfWeek: 'T3'
                     },
                     {$nor: [
                         { dateStart: { $gt: new Date()}}, 
