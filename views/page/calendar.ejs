@@ -37,6 +37,13 @@
             </a>
         </div>
     </div>
+    <% 
+    function toTitleCase (phrase,step) { 
+        return phrase .toLowerCase() .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(step);
+    };  
+    %>
     <div class="table-responsive card mt-5">
 		<table class="table mb-0 table-hover" id="myTable">
             <thead class="thead-dark">
@@ -94,7 +101,7 @@
                         <td><%= getDayOfWeek(calendar.dayOfWeek) %> </td>
                         <td><%- calendar.lesson %></td>
                         <td><%- calendar.classroom %></td>
-                        <td><%- calendar.teacher.name %></td>
+                        <td><%- toTitleCase(calendar.teacher.name," ") %></td>
                         <td><%= formatDate(calendar.dateStart,'/') %></td>
                         <td><%= formatDate(calendar.dateEnd,'/') %></td>
                         <td><%- descriptions[calendar.description-1][1]  %></td>
@@ -184,7 +191,7 @@
                                         <label class="font-weight-bold">Giáo Viên</label>
                                         <select class="form-control" name="teacher" >
                                             <% teachers.forEach(function(teacher) { %>
-                                                <option value="<%= teacher._id %>" <%= selected(teacher._id.toString(),calendar.teacher._id.toString()) %> ><%= teacher.name %> </option>
+                                                <option value="<%= teacher._id %>" <%= selected(teacher._id.toString(),calendar.teacher._id.toString()) %> ><%= toTitleCase(teacher.name," ") %> </option>
                                             <% }) %>
                                         </select> 
                                     </div>
@@ -242,7 +249,7 @@
                         <label class="font-weight-bold">Lớp Học Phần</label>
                         <select class="form-control text-uppercase" name="module">
                             <% modules.forEach(function(module) { %>
-                                <option value="<%= module._id %>"><%= module.nameModule %> </option>
+                                <option value="<%= module._id %>"><%= toTitleCase(module.nameModule," ") %> </option>
                             <% }) %> 
                         </select>
                     </div>
@@ -282,7 +289,7 @@
                         <label class="font-weight-bold">Giáo Viên</label>
                         <select class="form-control" name="teacher">
                             <% teachers.forEach(function(teacher) { %>
-                                <option value="<%= teacher._id %>"><%= teacher.name %> </option>
+                                <option value="<%= teacher._id %>"><%= toTitleCase(teacher.name," ") %> </option>
                             <% }) %>
                         </select>
                     </div>
