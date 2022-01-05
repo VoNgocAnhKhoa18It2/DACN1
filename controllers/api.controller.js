@@ -69,7 +69,7 @@ module.exports = {
 
     calendarToday: async (req, res) => {
         var now = new Date();
-        const thu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        const thu = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN','thu[now.getDay() - 1]'];
         const data = {
             successful: false,
         }   
