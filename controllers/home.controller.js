@@ -151,6 +151,7 @@ module.exports = {
         }
         var diem_hp = {
             cc: req.body.cc,
+            bt: req.body.bt,
             gk: req.body.gk,
             ck: req.body.ck,
             t10: (Math.round(tb * 1000) / 1000).toFixed(1),
